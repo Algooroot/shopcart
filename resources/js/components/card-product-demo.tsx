@@ -20,14 +20,7 @@ const CardProductDemo = () => {
           className='w-75'
         />
       </div>
-      <Button
-        size='icon'
-        onClick={() => setLiked(!liked)}
-        className='bg-primary/10 hover:bg-primary/20 absolute top-4 right-4 rounded-full'
-      >
-        <HeartIcon className={cn(liked ? 'fill-destructive stroke-destructive' : 'stroke-white')} />
-        <span className='sr-only'>Like</span>
-      </Button>
+     
       <Card className='border-none'>
         <CardHeader>
           <CardTitle>Nike Jordan Air Rev</CardTitle>
