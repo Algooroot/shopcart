@@ -20,7 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
         Route::post('/', [CartController::class, 'store'])->name('store');
         Route::put('/{cartItem}', [CartController::class, 'update'])->name('update');
-        Route::delete('/{cartItem}', [CartController::class, 'destroy'])->name('destroy');
+        Route::get('/{cartItem}/delete', [CartController::class, 'destroy'])->name('destroy');
     });
 });
 

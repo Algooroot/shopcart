@@ -51,7 +51,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         const metaToken = document.querySelector('meta[name="csrf-token"]');
         if (metaToken) {
             const token = metaToken.getAttribute('content');
-            if (token) return token;
+            if (token && token.trim() !== '') {
+                return token.trim();
+            }
         }
         
         // Fallback: try to get from XSRF-TOKEN cookie
@@ -61,10 +63,14 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             const trimmedCookie = cookie.trim();
             if (trimmedCookie.startsWith(name + '=')) {
                 const value = trimmedCookie.substring(name.length + 1);
-                return decodeURIComponent(value);
+                const decoded = decodeURIComponent(value);
+                if (decoded && decoded.trim() !== '') {
+                    return decoded.trim();
+                }
             }
         }
         
+        console.warn('CSRF token not found in meta tag or cookies');
         return null;
     };
 
@@ -184,23 +190,35 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const removeFromCart = async (cartItemId: number) => {
         try {
             const csrfToken = getCsrfToken();
+            
+            if (!csrfToken) {
+                console.error('CSRF token not found. Please refresh the page.');
+                throw new Error('CSRF token not found. Please refresh the page.');
+            }
+
+            // For DELETE requests, Laravel reads CSRF from header or cookie
+            // Make sure to send it in the header
             const headers: HeadersInit = {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': csrfToken,
             };
 
-            if (csrfToken) {
-                headers['X-XSRF-TOKEN'] = csrfToken;
-            }
-
-            const response = await fetch(`/api/cart/${cartItemId}`, {
-                method: 'DELETE',
+            const response = await fetch(`/api/cart/${cartItemId}/delete`, {
+                method: 'GET',
                 headers,
-                credentials: 'include',
+                credentials: 'include', // This ensures cookies (including XSRF-TOKEN) are sent
             });
 
             if (!response.ok) {
-                throw new Error('Failed to remove from cart');
+                let errorMessage = 'Failed to remove from cart';
+                try {
+                    const error = await response.json();
+                    errorMessage = error.message || error.error || errorMessage;
+                } catch (e) {
+                    errorMessage = response.statusText || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
 
             await fetchCart();

@@ -29,6 +29,7 @@ const CardProduct = ({ product }: CardProductProps) => {
     const [isInCart, setIsInCart] = useState<boolean>(false)
     const [showQuantityPicker, setShowQuantityPicker] = useState<boolean>(false)
     const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
+    const [isRemovingFromCart, setIsRemovingFromCart] = useState<boolean>(false)
     const [cartItemId, setCartItemId] = useState<number | null>(null)
     const { cartItems, addToCart, updateCartItem, removeFromCart } = useCart()
 
@@ -80,6 +81,20 @@ const CardProduct = ({ product }: CardProductProps) => {
         }
     }
 
+    const handleDelete = async () => {
+        if (cartItemId) {
+            try {
+                setIsRemovingFromCart(true)
+                await removeFromCart(cartItemId)
+                setShowQuantityPicker(false)
+            } catch (error) {
+                console.error('Error removing from cart:', error)
+            } finally {
+                setIsRemovingFromCart(false)
+            }
+        }
+    }
+
     return (
         <Card className='overflow-hidden transition-all hover:shadow-lg'>
             <div className='relative aspect-square overflow-hidden bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-900'>
@@ -115,6 +130,9 @@ const CardProduct = ({ product }: CardProductProps) => {
                             min={0}
                             max={product.stock}
                             disabled={product.stock === 0}
+                            onDelete={handleDelete}
+                            showDeleteIcon={quantity === 1}
+                            isLoading={isRemovingFromCart}
                         />
                     ) : (
                         <Button 
