@@ -15,7 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Product {
     id: number;
     name: string;
-    description: string;
     price: number;
     image_url: string;
     stock: number;
@@ -39,7 +38,7 @@ export default function Dashboard({ products }: DashboardProps) {
                             {products.map((product) => (
                                 <CardProduct key={product.id} product={product} />
                             ))}
-                        </div>
+                    </div>
                     ) : (
                         <Card>
                             <CardContent className="py-8 text-center text-muted-foreground">

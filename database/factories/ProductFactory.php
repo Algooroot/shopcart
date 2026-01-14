@@ -30,19 +30,6 @@ class ProductFactory extends Factory
             'Écouteur',
         ];
 
-        $descriptions = [
-            'Beautiful handcrafted ukulele with rich, warm tones perfect for beginners and professionals alike.',
-            'Latest generation smartphone with cutting-edge technology and stunning design.',
-            'Powerful professional laptop with high-performance processor and stunning display.',
-            'Versatile laptop perfect for work, study, and entertainment on the go.',
-            'Luxurious fragrance with elegant notes that last throughout the day.',
-            'Elegant high-heeled shoes perfect for special occasions and formal events.',
-            'Comfortable and stylish sneakers designed for everyday wear and athletic activities.',
-            'Modern eyewear with UV protection and contemporary frame design.',
-            'Premium quality t-shirt made from soft, breathable fabric for ultimate comfort.',
-            'High-quality wireless headphones with superior sound quality and noise cancellation.',
-        ];
-
         // Images e-commerce spécifiques Unsplash - ordre correspondant aux noms de produits
         $productImages = [
             'https://images.unsplash.com/photo-1547517023-c1afcd607fce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D', // ukelele
@@ -61,7 +48,6 @@ class ProductFactory extends Factory
 
         return [
             'name' => fake()->randomElement($productNames),
-            'description' => fake()->randomElement($descriptions),
             'price' => fake()->randomFloat(2, 29.99, 299.99),
             'image_url' => $imageUrl,
             'stock' => fake()->numberBetween(0, 100),

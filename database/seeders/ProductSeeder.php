@@ -41,25 +41,10 @@ class ProductSeeder extends Seeder
             'Écouteur',
         ];
 
-        // Descriptions correspondant aux produits
-        $descriptions = [
-            'Beautiful handcrafted ukulele with rich, warm tones perfect for beginners and professionals alike.',
-            'Latest generation smartphone with cutting-edge technology and stunning design.',
-            'Powerful professional laptop with high-performance processor and stunning display.',
-            'Versatile laptop perfect for work, study, and entertainment on the go.',
-            'Luxurious fragrance with elegant notes that last throughout the day.',
-            'Elegant high-heeled shoes perfect for special occasions and formal events.',
-            'Comfortable and stylish sneakers designed for everyday wear and athletic activities.',
-            'Modern eyewear with UV protection and contemporary frame design.',
-            'Premium quality t-shirt made from soft, breathable fabric for ultimate comfort.',
-            'High-quality wireless headphones with superior sound quality and noise cancellation.',
-        ];
-
-        // Créer 10 produits avec une image, nom et description uniques pour chacun
+        // Créer 10 produits avec une image et nom uniques pour chacun
         for ($i = 0; $i < 10; $i++) {
             Product::factory()->create([
                 'name' => $productNames[$i],
-                'description' => $descriptions[$i],
                 'image_url' => $productImages[$i],
             ]);
         }

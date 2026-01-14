@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils'
 interface Product {
     id: number;
     name: string;
-    description: string;
     price: number;
     image_url: string;
     stock: number;
@@ -109,8 +108,7 @@ const CardProduct = ({ product }: CardProductProps) => {
                 <CardTitle className='line-clamp-1'>{product.name}</CardTitle>
             </CardHeader>
             <CardContent className='pb-3'>
-                <p className='line-clamp-2 text-sm text-muted-foreground'>{product.description}</p>
-                <div className='mt-2 flex items-center gap-2'>
+                <div className='flex items-center gap-2'>
                     <span className='text-xs text-muted-foreground'>Stock:</span>
                     <span className={cn('text-xs font-medium', product.stock === 0 ? 'text-destructive' : 'text-green-600 dark:text-green-400')}>
                         {product.stock === 0 ? 'Out of stock' : `${product.stock} available`}
