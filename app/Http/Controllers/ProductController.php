@@ -14,8 +14,7 @@ class ProductController extends Controller
      */
     public function index(): Response
     {
-        $products = Product::where('is_active', true)
-            ->orderBy('created_at', 'desc')
+        $products = Product::orderBy('created_at', 'desc')
             ->get();
 
         return Inertia::render('dashboard', [

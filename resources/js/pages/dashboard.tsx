@@ -18,9 +18,6 @@ interface Product {
     description: string;
     price: number;
     image_url: string;
-    size: string | null;
-    color: string | null;
-    is_active: boolean;
     stock: number;
     created_at: string;
     updated_at: string;
@@ -36,12 +33,7 @@ export default function Dashboard({ products }: DashboardProps) {
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-                    <Card className="mb-4">
-                        <CardHeader>
-                            <CardTitle>Featured Products</CardTitle>
-                            <CardDescription>Discover our latest products</CardDescription>
-                        </CardHeader>
-                    </Card>
+                    
                     {products.length > 0 ? (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {products.map((product) => (

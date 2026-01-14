@@ -2,9 +2,8 @@ import { useState } from 'react'
 
 import { HeartIcon } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardDescription, CardTitle, CardFooter, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardFooter, CardContent } from '@/components/ui/card'
 
 import { cn } from '@/lib/utils'
 
@@ -14,8 +13,6 @@ interface Product {
     description: string;
     price: number;
     image_url: string;
-    size: string | null;
-    color: string | null;
 }
 
 interface CardProductProps {
@@ -33,30 +30,10 @@ const CardProduct = ({ product }: CardProductProps) => {
                     alt={product.name}
                     className='h-full w-full object-cover transition-transform duration-300 hover:scale-105'
                 />
-                <Button
-                    size='icon'
-                    onClick={() => setLiked(!liked)}
-                    variant='ghost'
-                    className='absolute right-2 top-2 h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background'
-                >
-                    <HeartIcon className={cn('h-4 w-4', liked ? 'fill-destructive stroke-destructive text-destructive' : '')} />
-                    <span className='sr-only'>Like</span>
-                </Button>
+               
             </div>
             <CardHeader className='pb-3'>
                 <CardTitle className='line-clamp-1'>{product.name}</CardTitle>
-                <CardDescription className='flex flex-wrap items-center gap-2'>
-                    {product.size && (
-                        <Badge variant='outline' className='text-xs'>
-                            {product.size}
-                        </Badge>
-                    )}
-                    {product.color && (
-                        <Badge variant='outline' className='text-xs'>
-                            {product.color}
-                        </Badge>
-                    )}
-                </CardDescription>
             </CardHeader>
             <CardContent className='pb-3'>
                 <p className='line-clamp-2 text-sm text-muted-foreground'>{product.description}</p>
