@@ -14,6 +14,9 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [ProductController::class, 'index'])->name('dashboard');
+    Route::get('detailitems', function () {
+        return Inertia::render('detailitems');
+    })->name('detailitems');
 
     // Cart API routes
     Route::prefix('api/cart')->name('cart.')->group(function () {
