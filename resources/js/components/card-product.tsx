@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { HeartIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardFooter, CardContent } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
+import QuantityPicker from '@/components/quantity-picker'
+import { useCart } from '@/contexts/cart-context'
 
 import { cn } from '@/lib/utils'
 
@@ -22,6 +25,60 @@ interface CardProductProps {
 
 const CardProduct = ({ product }: CardProductProps) => {
     const [liked, setLiked] = useState<boolean>(false)
+    const [quantity, setQuantity] = useState<number>(1)
+    const [isInCart, setIsInCart] = useState<boolean>(false)
+    const [showQuantityPicker, setShowQuantityPicker] = useState<boolean>(false)
+    const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
+    const [cartItemId, setCartItemId] = useState<number | null>(null)
+    const { cartItems, addToCart, updateCartItem, removeFromCart } = useCart()
+
+    useEffect(() => {
+        const existingCartItem = cartItems.find(item => item.product_id === product.id)
+        if (existingCartItem) {
+            setIsInCart(true)
+            setCartItemId(existingCartItem.id)
+            setQuantity(existingCartItem.quantity)
+            setShowQuantityPicker(true)
+        } else {
+            setIsInCart(false)
+            setCartItemId(null)
+            setQuantity(1)
+            setShowQuantityPicker(false)
+        }
+    }, [cartItems, product.id])
+
+    const handleAddToCart = async () => {
+        try {
+            setIsAddingToCart(true)
+            await addToCart(product.id, 1)
+            setShowQuantityPicker(true)
+            setIsInCart(true)
+        } catch (error) {
+            console.error('Error adding to cart:', error)
+        } finally {
+            setIsAddingToCart(false)
+        }
+    }
+
+    const handleQuantityChange = async (newQuantity: number) => {
+        if (newQuantity < 1) {
+            if (cartItemId) {
+                await removeFromCart(cartItemId)
+                setShowQuantityPicker(false)
+            }
+            return
+        }
+
+        if (newQuantity > product.stock) {
+            return
+        }
+
+        if (isInCart && cartItemId) {
+            await updateCartItem(cartItemId, newQuantity)
+        } else {
+            await addToCart(product.id, newQuantity)
+        }
+    }
 
     return (
         <Card className='overflow-hidden transition-all hover:shadow-lg'>
@@ -50,9 +107,37 @@ const CardProduct = ({ product }: CardProductProps) => {
                     <span className='text-xs font-medium uppercase text-muted-foreground'>Price</span>
                     <span className='text-xl font-bold'>${Number(product.price).toFixed(2)}</span>
                 </div>
-                <Button size='lg' className='shrink-0' disabled={product.stock === 0}>
-                    {product.stock === 0 ? 'Out of stock' : 'Add to cart'}
-                </Button>
+                {product.stock > 0 ? (
+                    showQuantityPicker ? (
+                        <QuantityPicker
+                            quantity={quantity}
+                            onQuantityChange={handleQuantityChange}
+                            min={0}
+                            max={product.stock}
+                            disabled={product.stock === 0}
+                        />
+                    ) : (
+                        <Button 
+                            size='lg' 
+                            className='shrink-0 cursor-pointer' 
+                            onClick={handleAddToCart}
+                            disabled={isAddingToCart}
+                        >
+                            {isAddingToCart ? (
+                                <>
+                                    <Spinner className="mr-2 h-4 w-4" />
+                                    Adding...
+                                </>
+                            ) : (
+                                'Add to cart'
+                            )}
+                        </Button>
+                    )
+                ) : (
+                    <Button size='lg' className='shrink-0' disabled>
+                        Out of stock
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     )
