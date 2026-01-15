@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import AppLayout from "@/layouts/app-layout";
 import { Head } from "@inertiajs/react";
 import { listcommand } from "@/routes";
@@ -91,12 +92,17 @@ const CartItemCard = ({ cartItem }: { cartItem: any }) => {
 };
 
 const OrdersListContent = () => {
-    const { cartItems, total, fetchCart, loading } = useCart();
+    const { cartItems, total, cartCount, fetchCart, loading } = useCart();
 
     useEffect(() => {
         fetchCart();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const handlePlaceOrder = () => {
+        // TODO: Implement place order functionality
+        console.log("Place order clicked");
+    };
 
     return (
         <>
@@ -128,7 +134,7 @@ const OrdersListContent = () => {
                             </div>
                         </CardContent>
                     </Card>
-                    <div className="space-y-4">
+                    <div className="space-y-4 mb-6">
                         {cartItems.length > 0 ? (
                             cartItems.map((item) => <CartItemCard key={item.id} cartItem={item} />)
                         ) : (
@@ -143,6 +149,30 @@ const OrdersListContent = () => {
                             </Card>
                         )}
                     </div>
+                    {cartItems.length > 0 && (
+                        <Card className="sticky bottom-0 z-10">
+                            <CardContent className="pt-6">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <ShoppingCart className="h-4 w-4" />
+                                        <span>
+                                            {cartCount} {cartCount === 1 ? "item" : "items"} in cart
+                                        </span>
+                                    </div>
+                                    <Button
+                                        variant="default"
+                                        size="lg"
+                                        onClick={handlePlaceOrder}
+                                        disabled={loading || total === 0}
+                                        className="min-w-[220px]"
+                                    >
+                                        <ShoppingCart className="mr-2 h-4 w-4" />
+                                        Place Order ({cartCount}) - {formatCurrency(total, "USD")}
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </section>
         </>
