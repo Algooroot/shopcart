@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { MinusIcon, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
@@ -24,30 +25,51 @@ const QuantityPicker = ({
     showDeleteIcon = false,
     isLoading = false
 }: QuantityPickerProps) => {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [previousQuantity, setPreviousQuantity] = useState(quantity);
+    const [previousIsLoading, setPreviousIsLoading] = useState(isLoading);
+
+    // Réinitialiser isProcessing quand la quantité change ou quand isLoading passe de true à false
+    useEffect(() => {
+        if (previousQuantity !== quantity && isProcessing) {
+            setIsProcessing(false);
+        }
+        if (previousIsLoading && !isLoading && isProcessing) {
+            setIsProcessing(false);
+        }
+        setPreviousQuantity(quantity);
+        setPreviousIsLoading(isLoading);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [quantity, isLoading]);
+
     const handleDecrease = () => {
-        if (quantity > min) {
+        if (quantity > min && !isProcessing) {
+            setIsProcessing(true);
             onQuantityChange(quantity - 1);
         }
     };
 
     const handleIncrease = () => {
-        if (quantity < max) {
+        if (quantity < max && !isProcessing) {
+            setIsProcessing(true);
             onQuantityChange(quantity + 1);
         }
     };
 
     const handleDelete = () => {
-        if (onDelete) {
+        if (onDelete && !isProcessing) {
+            setIsProcessing(true);
             onDelete();
         }
     };
 
     const isQuantityOne = quantity === 1 && showDeleteIcon;
+    const showSpinner = isLoading || isProcessing;
 
     return (
         <ButtonGroup>
             <Button
-                disabled={disabled || isLoading || (quantity <= min && !isQuantityOne)}
+                disabled={disabled || showSpinner || (quantity <= min && !isQuantityOne)}
                 onClick={isQuantityOne ? handleDelete : handleDecrease}
                 size="sm"
                 variant="outline"
@@ -72,14 +94,14 @@ const QuantityPicker = ({
                 )}
             </Button>
             <ButtonGroupText className="min-w-12 justify-center">
-                {isLoading ? (
+                {showSpinner ? (
                     <Spinner className="h-4 w-4" />
                 ) : (
                     quantity
                 )}
             </ButtonGroupText>
             <Button
-                disabled={disabled || isLoading || quantity >= max}
+                disabled={disabled || showSpinner || quantity >= max}
                 onClick={handleIncrease}
                 size="sm"
                 variant="outline"
