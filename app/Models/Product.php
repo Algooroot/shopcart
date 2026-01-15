@@ -42,4 +42,12 @@ class Product extends Model
     {
         return $this->hasMany(CartItem::class);
     }
+
+    /**
+     * Get the purchased items for the product.
+     */
+    public function purchasedItems()
+    {
+        return $this->hasMany(PurchasedItem::class);
+    }
 }

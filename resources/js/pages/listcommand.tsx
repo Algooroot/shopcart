@@ -9,6 +9,7 @@ import { type BreadcrumbItem } from "@/types";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import QuantityPicker from "@/components/quantity-picker";
+import { toast } from "sonner";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -93,15 +94,109 @@ const CartItemCard = ({ cartItem }: { cartItem: any }) => {
 
 const OrdersListContent = () => {
     const { cartItems, total, cartCount, fetchCart, loading } = useCart();
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
     useEffect(() => {
         fetchCart();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handlePlaceOrder = () => {
-        // TODO: Implement place order functionality
-        console.log("Place order clicked");
+    const getCsrfToken = (): string | null => {
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken) {
+            const token = metaToken.getAttribute('content');
+            if (token && token.trim() !== '') {
+                return token.trim();
+            }
+        }
+        
+        const name = 'XSRF-TOKEN';
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const trimmedCookie = cookie.trim();
+            if (trimmedCookie.startsWith(name + '=')) {
+                const value = trimmedCookie.substring(name.length + 1);
+                const decoded = decodeURIComponent(value);
+                if (decoded && decoded.trim() !== '') {
+                    return decoded.trim();
+                }
+            }
+        }
+        
+        return null;
+    };
+
+    const handlePlaceOrder = async () => {
+        if (cartItems.length === 0 || total === 0) {
+            return;
+        }
+
+        setIsPlacingOrder(true);
+        try {
+            const csrfToken = getCsrfToken();
+            
+            if (!csrfToken) {
+                toast.error('CSRF token not found. Please refresh the page.');
+                return;
+            }
+
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': csrfToken,
+            };
+
+            const body: any = {
+                _token: csrfToken,
+            };
+
+            const response = await fetch('/api/purchased-items', {
+                method: 'POST',
+                headers,
+                credentials: 'include',
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                let errorMessage = 'Failed to place order';
+                let errorDetails = '';
+                try {
+                    const error = await response.json();
+                    errorMessage = error.message || error.error || errorMessage;
+                    if (error.product) {
+                        errorDetails = `Product: ${error.product}\nAvailable stock: ${error.available_stock}\nRequested: ${error.requested_quantity}`;
+                        toast.error(errorMessage, {
+                            description: errorDetails,
+                            duration: 5000,
+                        });
+                    } else {
+                        toast.error(errorMessage, {
+                            duration: 5000,
+                        });
+                    }
+                } catch (e) {
+                    errorMessage = response.statusText || errorMessage;
+                    toast.error(errorMessage, {
+                        duration: 5000,
+                    });
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            toast.success('Order placed successfully!', {
+                description: `Your order has been confirmed.`,
+                duration: 4000,
+            });
+            
+            // Refresh cart to show empty state
+            await fetchCart();
+        } catch (error) {
+            console.error('Error placing order:', error);
+        } finally {
+            setIsPlacingOrder(false);
+        }
     };
 
     return (
@@ -163,11 +258,11 @@ const OrdersListContent = () => {
                                         variant="default"
                                         size="lg"
                                         onClick={handlePlaceOrder}
-                                        disabled={loading || total === 0}
+                                        disabled={loading || total === 0 || isPlacingOrder}
                                         className="min-w-[220px]"
                                     >
                                         <ShoppingCart className="mr-2 h-4 w-4" />
-                                        Place Order ({cartCount}) - {formatCurrency(total, "USD")}
+                                        {isPlacingOrder ? 'Placing Order...' : `Place Order (${cartCount}) - ${formatCurrency(total, "USD")}`}
                                     </Button>
                                 </div>
                             </CardContent>

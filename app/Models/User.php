@@ -66,4 +66,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(CartItem::class);
     }
+
+    /**
+     * Get the purchased items for the user.
+     */
+    public function purchasedItems()
+    {
+        return $this->hasMany(PurchasedItem::class);
+    }
 }
